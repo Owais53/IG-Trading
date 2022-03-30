@@ -11,7 +11,9 @@
     'depends' : ['product','sale'],
     'data': [
 
-        'view/product.xml'
+        'view/product.xml',
+        'report/report_view.xml',
+        'report/sale_order.xml',
     ],
     'demo': [
 
