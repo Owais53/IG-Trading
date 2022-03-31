@@ -18,10 +18,10 @@
             <field name="arch" type="xml">
                 <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='name']" position="after">
                   <field name="model" readonly="0"/>
+                    <field name="on_hand" readonly="0"/>
                 </xpath>
                 <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='price_unit']" position="after">
                   <field name="sale_price" readonly="0" optional="show"/>
-                  <field name="on_hand"/>
                 </xpath>
             </field>
         </record>
@@ -33,34 +33,58 @@
                 <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='name']" position="after">
                   <field name="model" readonly="0"/>
                 </xpath>
+                <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='product_qty']" position="after">
+                  <field name="intransit_qty" readonly="0"/>
+                </xpath>
                 <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='price_unit']" position="after">
                     <field name="model" readonly="0"/>
                     <field name="cost" readonly="0"/>
-
                 </xpath>
             </field>
         </record>
-
-    <record id="view_invoice_from" model="ir.ui.view">
-            <field name="name">account.move</field>
-            <field name="model">account.move</field>
-            <field name="inherit_id" ref="account.view_move_form"/>
+     <record id="view_stock_picking_inherit_new" model="ir.ui.view">
+            <field name="name">stocking.picking.inherit.new</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
             <field name="arch" type="xml">
-                 <xpath expr="//field[@name='payment_reference']" position="after">
-                  <field name="bilty"/>
+                <xpath expr="//field[@name='name']" position="after">
+                    <field name="check_validation" invisible="1"/>
                 </xpath>
-<!--                <xpath expr="//label[@for='invoice_payment_term_id']" position="after">-->
-<!--                  <field name="bilty_date"/>-->
-<!--                </xpath>-->
-                <xpath expr="//div[@class='d-flex']" position="after">
-                  <field name="bilty_date" readonly="0"/>
-                </xpath>
-                <xpath expr="//field[@name='bilty']" position="after">
-                  <field name="no_packages"/>
+                <xpath expr="//form/header" position="inside">
+                    <button string="Approve" class="oe_stat_button" type="object" name="before_validation" attrs="{'invisible': [('check_validation', '=', True)]}"/>
                 </xpath>
 
+                <xpath expr="//form/header/button[@name='button_validate']" position="attributes">
+                    <attribute name="attrs">
+                        {'invisible': [('check_validation', '=', False)]}
+                    </attribute>
+                </xpath>
+                <field name="state" position="replace">
+                <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,assigned,intransit,done" />
+                </field>
+                <xpath expr="/form/sheet/notebook/page/field[@name='move_ids_without_package']/tree/field[@name='product_uom_qty']" position="after">
+                      <field name="intransit_qty" readonly="0"/>
+                </xpath>
+            </field>
+        </record>
+        <record id="view_product_template_intransit" model="ir.ui.view">
+            <field name="name">product.template.intransit.button.inherit</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_only_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='button_box']" position="inside">
+                   <button class="oe_stat_button" name="get_qty"
+                            icon="fa-truck">
+                       <div class="o_field_widget o_stat_info">
+                           <span class="o_stat_value">
+                                <field  name="intransit_qty" widget="statinfo" nolabel="1" class="mr4"/>
+                               <field name="uom_name"/>
+                           </span>
+                           <span class="o_stat_text">InTransit</span>
+                       </div>
 
-
+                   </button>
+                </xpath>
             </field>
         </record>
 </odoo>
