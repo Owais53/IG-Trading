@@ -18,39 +18,39 @@
                             <strong><center>Sale Order</center></strong>
                         </h3>
                     </div>
-                        <table style="border:1px solid black; margin-top:5px; padding-top:15px;padding-left:2px;width:100%;height:30px ;">
+                        <table style="border-top: 1px solid black; border-right:1px solid black; border-left: 1px solid black; padding-top:15px;padding-left:2px;width:100%;height:30px ;">
                                             <tr>
                                                 <td style="padding: 10px;font-size:15px;">
-                                       <strong>Order Sequence Number:</strong>
+                                       <strong>Order Sequence Number:</strong><span  style="font-size:12px; padding-left:2px;" t-field="s.name"/>
                                                  </td>
                                                 <td style="padding: 10px;font-size:15px;">
-                                       <strong>Date:</strong>
+                                       <strong>Date:</strong><span  style="font-size:12px;padding-left:2px;" t-field="s.date_order"/>
                                                  </td>
                                             </tr>
                                             <tr>
                                                  <td style="padding: 10px;font-size:15px;">
-                                       <strong>Customer Name:</strong>
+                                       <strong>Customer Name:</strong><span style="font-size:12px; padding-left:2px;" t-field="s.partner_id"/>
                                                  </td>
                                                 <td style="padding: 10px;font-size:15px;">
-                                       <strong>Phone Number:</strong>
+                                       <strong>Phone Number:</strong><span style="font-size:12px; padding-left:2px; " t-field="s.partner_id.mobile"/>
                                                  </td>
 
                                             </tr>
                         </table>
-                        <table style="border: 1px solid black; width: 100%; height: 30px;">
+                        <table style="border-top: 1px solid black; border-right:1px solid black; border-left: 1px solid black; width: 100%; height: 30px;">
                             <tbody>
                                 <tr style="height: 10.5px;">
                                 <th style="border-right: 1px solid black; height: 10.5px; font-size: 15px; text-align: left;  width: 50%;">PRODUCT DETAIL</th>
                                 <th style="border-right: 1px solid black; height: 6px; font-size: 15px; text-align: left;  width: 30%;">QUANTITY</th>
-                                <th style="height: 6px; font-size: 15px; text-align: left; width: 20%;">RATES</th>
+                                    <th style="height: 6px; font-size: 15px; text-align: left; width: 20%;">RATES</th>
                                 </tr>
                             </tbody>
                         </table>
-                        <table style="border: 1px solid black; width: 101.24%; height: 40px;">
+                        <table style="border: 1px solid black; border-right: 1px solid black; width: 100%; height: 40px;">
                             <tbody>
                                 <tr style="height: 10.5px;">
                                     <th style="border-right: 1px solid black; height: 10.5px; font-size: 09px; text-align: left; width: 15%;">Product</th>
-                                    <th style="border-right: 1px solid black; height: 6px; font-size: 09px; text-align: left;  width: 10%;">Quantity</th>
+                                    <th style="border-right: 1px solid black; height: 6px; font-size: 09px; text-align: left;  width: 10%;">Brand</th>
                                     <th style="border-right: 1px solid black; height: 6px; font-size: 09px; text-align: left;  width: 10%;">Description</th>
                                     <th style="border-right: 1px solid black; height: 6px; font-size: 09px; text-align: left;  width: 10%;">Model</th>
                                     <th style="border-right: 1px solid black; height: 6px; font-size: 09px; text-align: left;  width: 5%;">Size</th>
@@ -61,9 +61,30 @@
                                     <th style="border-right: 1px solid black; height: 6px; font-size: 08px; text-align: left;  width: 6%;">Packed</th>
                                     <th style="border-right: 1px solid black; height: 6px; font-size: 09px; text-align: left;  width: 6%;">Cost</th>
                                     <th style="border-right: 1px solid black; height: 6px; font-size: 09px; text-align: left;  width: 6%;">Sale</th>
-                                    <th style="border-right: 1px solid black; height: 6px; font-size: 08px; text-align: left;  width: 6%;">Desired</th>
+                                    <th style=" height: 6px; font-size: 08px; text-align: left;  width: 6%;">Desired</th>
                                 </tr>
                             </tbody>
+                            </table>
+                            <table style="width: 100%; height: 40px;">
+                             <table style="border-bottom: 1px solid black; border-right:1px solid black; border-left: 1px solid black;width:100%;height:40px;">
+                             <tr  t-foreach="docs.order_line" t-as="l">
+                                    <td style="border-right: 1px solid black; height: 10.5px; text-align: left; width: 15%;"><span style="font-size:9px;" t-if="l.product_id" t-field="l.product_id"/></td>
+                                    <td style="border-right: 1px solid black; height: 6px; text-align: left;  width: 10%;"><span style="font-size:9px;" t-if="l.brand" t-field="l.brand"/></td>
+                                    <td style="border-right: 1px solid black; height: 6px; text-align: left;  width: 10%;"><span style="font-size:9px;" t-if="l.name" t-field="l.name"/></td>
+                                    <td style="border-right: 1px solid black; height: 6px; text-align: left;  width: 10%;"><span style="font-size:9px;" t-if="l.model" t-field="l.model"/></td>
+                                    <td style="border-right: 1px solid black; height: 6px; text-align: left;  width: 5%;"><span style="font-size:9px;" t-if="l.product_uom_qty" t-field="l.product_uom_qty"/></td>
+                                    <td style="border-right: 1px solid black; height: 6px; text-align: left;  width: 6%;"><span style="font-size:9px;" t-if="l.product_uom_qty" t-field="l.product_uom_qty"/></td>
+                                    <td style="border-right: 1px solid black; height: 6px; text-align: left;  width: 6%;"><span style="font-size:9px;" t-if="l.on_hand" t-field="l.on_hand"/></td>
+                                    <td style="border-right: 1px solid black; height: 6px; text-align: left;  width: 6%;"><span style="font-size:9px;" t-if="l.others_qty" t-field="l.others_qty"/></td>
+                                    <td style="border-right: 1px solid black; height: 6px; text-align: left;  width: 6%;"><span style="font-size:9px;" t-if="l.product_uom_qty" t-field="l.product_uom_qty"/></td>
+                                    <td style="border-right: 1px solid black; height: 6px; text-align: left;  width: 6%;"><span style="font-size:9px;" t-if="l.product_id.standard_price" t-field="l.product_id.standard_price"/></td>
+                                    <td style="border-right: 1px solid black; height: 6px; text-align: left;  width: 6%;"><span style="font-size:9px;" t-if="l.product_id.standard_price" t-field="l.product_id.standard_price"/></td>
+                                    <td style="border-right: 1px solid black; height: 6px; text-align: left;  width: 6%;"><span style="font-size:9px;" t-if="l.product_id.list_price" t-field="l.product_id.list_price"/></td>
+                                    <td style=" height: 6px; text-align: left;  width: 6%;"><span style="font-size:8px;" t-if="l.product_uom_qty" t-field="l.product_uom_qty"/></td>
+
+<!--                                    <td width="50%" style="text-align:left; padding:5px; font-size:18px; font-weight:bold;"><span style="font-size:18px; font-weight:bold;">Received From:<span style="font-size:16px;" t-if="s.partner_id" t-field="s.partner_id"/></span></td>-->
+                             </tr>
+                             </table>
                             </table>
 
 
