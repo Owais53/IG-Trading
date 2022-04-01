@@ -8,7 +8,46 @@ class Product(models.Model):
 
     model = fields.Char('Model')
     brand = fields.Char('Brand ')
+    intransit_qty = fields.Float('Intransit Quantity',compute='get_intransit_qty')
 
+    def get_qty(self):
+        return True
+
+    def get_intransit_qty(self):
+        for rec in self:
+            product_id = self.env['product.product'].search([('product_tmpl_id', '=', rec.id)]).id
+            stock_move = self.env['stock.move'].search([('product_id', '=', product_id)])
+            total_transit_qty = 0
+            for line in stock_move:
+                intransit_qty = line.intransit_qty
+                total_transit_qty += intransit_qty
+                intransit_qty = 0
+            rec.intransit_qty = total_transit_qty
+
+class StockPicking(models.Model):
+    _inherit = "stock.picking"
+
+    check_validation = fields.Boolean(default=False)
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('waiting', 'Waiting Another Operation'),
+        ('confirmed', 'Waiting'),
+        ('assigned', 'Ready'),
+        ('intransit','Intransit'),
+        ('done', 'Done'),
+        ('cancel', 'Cancelled'),
+    ], string='Status', compute='_compute_state',
+        copy=False, index=True, readonly=True, store=True, tracking=True,
+        help=" * Draft: The transfer is not confirmed yet. Reservation doesn't apply.\n"
+             " * Waiting another operation: This transfer is waiting for another operation before being ready.\n"
+             " * Waiting: The transfer is waiting for the availability of some products.\n(a) The shipping policy is \"As soon as possible\": no product could be reserved.\n(b) The shipping policy is \"When all products are ready\": not all the products could be reserved.\n"
+             " * Ready: The transfer is ready to be processed.\n(a) The shipping policy is \"As soon as possible\": at least one product has been reserved.\n(b) The shipping policy is \"When all products are ready\": all product have been reserved.\n"
+             " * Done: The transfer has been processed.\n"
+             " * Cancelled: The transfer has been cancelled.")
+
+    def before_validation(self):
+        self.state = 'intransit'
+        self.check_validation = True
 
 class SaleOrderline(models.Model):
     _inherit = "sale.order.line"
@@ -120,6 +159,7 @@ class PurchaseOrderline(models.Model):
 
     model = fields.Char('Model')
     cost = fields.Char('Cost')
+    intransit_qty = fields.Float('Intransit Quantity',compute='get_intransit_qty')
 
     @api.onchange('model')
     def get_model(self):
@@ -131,6 +171,21 @@ class PurchaseOrderline(models.Model):
                 rec.product_id = product_id
                 rec.model = model
 
+    @api.depends('intransit_qty')
+    def get_intransit_qty(self):
+        for rec in self:
+            if rec.product_id:
+                intransit = 0
+                rec.intransit_qty = 0
+                stock_moves = self.env['stock.move'].search([('product_id', '=', rec.product_id.id)])
+                for stock in stock_moves:
+                 state = stock.picking_id.state
+                 if state == "intransit":
+                    intransit += stock.intransit_qty
+                    rec.intransit_qty = intransit
+
+
+
 
 class AccountMove(models.Model):
     _inherit = "account.move"
@@ -140,4 +195,14 @@ class AccountMove(models.Model):
     bilty_date = fields.Date(readonly=1, string='Bilty Date')
     no_packages = fields.Char('Number Of Packages')
 
+class StockMove(models.Model):
+    _inherit = "stock.move"
+
+    intransit_qty = fields.Float()
+
+
+class StockMoveLine(models.Model):
+    _inherit = "stock.move.line"
+
+    intransit_qty = fields.Float()
 
