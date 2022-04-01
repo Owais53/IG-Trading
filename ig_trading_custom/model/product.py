@@ -47,10 +47,11 @@ class SaleOrderline(models.Model):
         for rec in self:
             if rec.product_id:
                 model = rec.model
-                product = self.env['product.template'].search([('model', '=', rec.model)]).id
-                product_id = self.env['product.product'].search([('product_tmpl_id', '=', product)]).id
-                rec.product_id = product_id
-                rec.model = model
+                if model:
+                 product = self.env['product.template'].search([('model', '=', rec.model)]).id
+                 product_id = self.env['product.product'].search([('product_tmpl_id', '=', product)]).id
+                 rec.product_id = product_id
+                 rec.model = model
 
 
 class SaleOrder(models.Model):
