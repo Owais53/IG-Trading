@@ -7,12 +7,14 @@ class Product(models.Model):
     _inherit = "product.template"
 
     model = fields.Char('Model')
+    brand = fields.Char('Brand ')
 
 
 class SaleOrderline(models.Model):
     _inherit = "sale.order.line"
 
     model = fields.Char('Model')
+    brand = fields.Char('Brand ')
     sale_price = fields.Float('Previous Price')
     on_hand = fields.Float()
     others_qty = fields.Float('Others')
@@ -28,19 +30,36 @@ class SaleOrderline(models.Model):
                 rec.model = model
 
     @api.onchange('product_id')
+    def get_product_id(self):
+        for rec in self:
+            if rec.product_id:
+                product_id = rec.product_id
+                # product = self.env['product.template'].search([('model', '=', rec.model)]).id
+                product_id = self.env['product.product'].search([('id', '=', product_id.id)])
+                rec.product_id = product_id
+                rec.brand = product_id.brand
+                rec.model = product_id.model
+
+    @api.onchange('product_id')
     def product_location_change(self):
         for rec in self:
             if rec.product_id:
                 others = 0
                 stock_qty_obj = self.env['stock.quant']
                 stock_qty_lines = stock_qty_obj.search([('product_id', '=', rec.product_id.id)])
+                if not stock_qty_lines:
+                    rec.on_hand = 0
+                    rec.others_qty = 0
                 for stock in stock_qty_lines:
                     location_id = rec.order_id.warehouse_id.lot_stock_id
                     if location_id.id == stock.location_id.id:
                         rec.on_hand = stock.quantity
                     else:
-                        others += stock.quantity
-                        rec.others_qty = others
+                       if stock.quantity > 0:
+                         others += stock.quantity
+                         rec.others_qty = others
+
+
 
 
 class SaleOrder(models.Model):
@@ -119,3 +138,5 @@ class AccountMove(models.Model):
 
     bilty_date = fields.Date(readonly=1, string='Bilty Date')
     no_packages = fields.Char('Number Of Packages')
+
+
