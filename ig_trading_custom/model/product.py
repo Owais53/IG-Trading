@@ -205,4 +205,42 @@ class StockMoveLine(models.Model):
     _inherit = "stock.move.line"
 
     intransit_qty = fields.Float()
+    
+    
+class deliveryreport(models.Model):
+    _inherit = "stock.move"
+
+    model = fields.Char('Model')
+    brand = fields.Char('Brand ')
+    on_hand = fields.Float()
+    others_qty = fields.Float('Others')
+
+    @api.onchange('model')
+    def get_model(self):
+        for rec in self:
+            if rec.model:
+                model = rec.model
+                if model:
+                    product = self.env['product.template'].search([('model', '=', rec.model)]).id
+                    product_id = self.env['product.product'].search([('product_tmpl_id', '=', product)]).id
+                    rec.product_id = product_id
+                    rec.model = model
+
+    ############################### Product se brand or model uthaya hai #########################
+    @api.onchange('product_id')
+    def get_product_id(self):
+        for rec in self:
+            if rec.product_id:
+                product_id = rec.product_id
+                # product = self.env['product.template'].search([('model', '=', rec.model)]).id
+                product_id = self.env['product.product'].search([('id', '=', product_id.id)])
+                rec.product_id = product_id
+                rec.brand = product_id.brand
+                rec.model = product_id.model
+
+
+class Delivery(models.Model):
+    _inherit = "stock.picking"
+
+    transport = fields.Char('Transport')    
 
