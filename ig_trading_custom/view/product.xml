@@ -28,6 +28,30 @@
                 </xpath>
             </field>
         </record>
+    
+      ################################# Delivery ############################################
+      <record id="view_stock_picking_from" model="ir.ui.view">
+            <field name="name">stock.picking.inherit</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='location_id']" position="after">
+                    <field name="transport"/>
+                </xpath>
+
+                <xpath expr="/form/sheet/notebook/page/field[@name='move_ids_without_package']/tree/field[@name='product_id']" position="after">
+                  <field name="brand" readonly="0"/>
+                  <field name="model" readonly="0"/>
+                </xpath>
+                <xpath expr="/form/sheet/notebook/page/field[@name='move_ids_without_package']/tree/field[@name='product_uom_qty']" position="after">
+<!--                  <field name="sale_price" readonly="0" optional="show"/>-->
+                  <field name="on_hand"/>
+                  <field name="others_qty"/>
+                </xpath>
+            </field>
+        </record>
+
          <record id="view_purchase_order_from" model="ir.ui.view">
             <field name="name">purchase.order.inherit</field>
             <field name="model">purchase.order</field>
