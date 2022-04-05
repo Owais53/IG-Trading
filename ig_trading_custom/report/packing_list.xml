@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+
+    <template id="ig_trading_custom.ig_stock_picking_template">
+         <t t-call="web.html_container">
+<!--            <t t-call="web.external_layout">-->
+                <t t-foreach="docs" t-as="s">
+                    <div class="page">
+                        <div class="container">
+
+                        </div>
+                        <div class="oe_structure"/>
+                    <br/>
+
+                    <div>
+                        <h3 class="text-center" >
+                            <strong><center>Packing List</center></strong>
+                        </h3>
+                    </div>
+                        <table style="border-top: 1px solid black; border-right:1px solid black; border-left: 1px solid black; padding-top:15px;padding-left:2px;width:100%;height:30px ;">
+                                            <tr>
+                                                <td style="padding: 10px;font-size:15px;">
+                                       <strong>Order Sequence Number:</strong><span  style="font-size:12px; padding-left:2px;" t-field="s.name"/>
+                                                 </td>
+                                                <td style="padding: 10px;font-size:15px;">
+                                       <strong>Date:</strong><span  style="font-size:12px;padding-left:2px;" t-field="s.scheduled_date"/>
+                                                 </td>
+                                            </tr>
+                                            <tr>
+                                                 <td style="padding: 10px;font-size:15px;">
+                                       <strong>Customer Name:</strong><span style="font-size:12px; padding-left:2px;" t-field="s.partner_id"/>
+                                                 </td>
+                                                <td style="padding: 10px;font-size:15px;">
+                                       <strong>Phone Number:</strong><span style="font-size:12px; padding-left:2px; " t-field="s.partner_id.mobile"/>
+                                                 </td>
+
+                                            </tr>
+                                        <tr>
+                                                 <td style="padding: 10px;font-size:15px;">
+                                       <strong>Address:</strong><span style="font-size:12px; padding-left:2px;" t-field="s.partner_id.street"/>
+                                                 </td>
+                                                <td style="padding: 10px;font-size:15px;">
+                                       <strong>Salesperson Name:</strong><span style="font-size:12px; padding-left:2px; " t-field="s.user_id"/>
+                                                 </td>
+
+                                            </tr>
+                                         <tr>
+                                                 <td style="padding: 10px;font-size:15px;">
+                                       <strong>Transport:</strong><span style="font-size:12px; padding-left:2px;" t-field="s.transport"/>
+                                                 </td>
+                                                <td style="padding: 10px;font-size:15px;">
+                                       <strong>Email:</strong><span style="font-size:12px; padding-left:2px; " t-field="s.partner_id.email"/>
+                                                 </td>
+
+                                            </tr>
+                        </table>
+
+                        <table style="border: 1px solid black; border-right: 1px solid black; width: 100%; height: 40px;">
+                            <tbody>
+                                <tr style="height: 10.5px;">
+                                    <th style="border-right: 1px solid black; height: 10.5px; font-size: 12px; text-align: left; width: 14%;">Product</th>
+                                    <th style="border-right: 1px solid black; height: 6px; font-size: 12px; text-align: left;  width: 14%;">Brand</th>
+                                    <th style="border-right: 1px solid black; height: 6px; font-size: 12px; text-align: left;  width: 14%;">Size</th>
+                                    <th style="border-right: 1px solid black; height: 6px; font-size: 12px; text-align: left;  width: 14%;">On-Hand</th>
+                                    <th style="border-right: 1px solid black; height: 6px; font-size: 12px; text-align: left;  width: 14%;">Others</th>
+                                    <th style="border-right: 1px solid black; height: 6px; font-size: 12px; text-align: left;  width: 14%;">Packed</th>
+                                    <th style="height: 6px; font-size: 12px; text-align: left;  width: 14%;">Issue Quantity</th>
+
+                                </tr>
+                            </tbody>
+                            </table>
+                            <table style="width: 100%; height: 40px;">
+                             <table style="border-bottom: 1px solid black; border-right:1px solid black; border-left: 1px solid black;width:100%;height:40px;">
+                             <tr  t-foreach="docs.move_ids_without_package" t-as="l">
+                                    <td style="border-right: 1px solid black; height: 10.5px; text-align: left; width: 14%;"><span style="font-size:11px;" t-if="l.product_id" t-field="l.product_id"/></td>
+                                    <td style="border-right: 1px solid black; height: 6px; text-align: left;  width: 14%;"><span style="font-size:11px;" t-if="l.brand" t-field="l.brand"/></td>
+                                    <td style="border-right: 1px solid black; height: 6px; text-align: left;  width: 14%;"><span style="font-size:11px;" t-if="l.name" t-field="l.name"/></td>
+                                    <td style="border-right: 1px solid black; height: 6px; text-align: left;  width: 14%;"><span style="font-size:11px;" t-if="l.on_hand" t-field="l.on_hand"/></td>
+                                    <td style="border-right: 1px solid black; height: 6px; text-align: left;  width: 14%;"><span style="font-size:11px;" t-if="l.others_qty" t-field="l.others_qty"/></td>
+                                    <td style="border-right: 1px solid black; height: 6px; text-align: left;  width: 14%;"><span style="font-size:11px;" t-if="l.forecast_availability" t-field="l.forecast_availability"/></td>
+                                    <td style="height: 6px; text-align: left;  width: 14%;"><span style="font-size:11px;" t-if="l.product_uom_qty" t-field="l.product_uom_qty"/></td>
+
+
+<!--                                    <td width="50%" style="text-align:left; padding:5px; font-size:18px; font-weight:bold;"><span style="font-size:18px; font-weight:bold;">Received From:<span style="font-size:16px;" t-if="s.partner_id" t-field="s.partner_id"/></span></td>-->
+                             </tr>
+                             </table>
+                            </table>
+
+
+
+
+
+
+
+                    </div>
+                </t>
+         </t>
+    </template>
+</odoo>
