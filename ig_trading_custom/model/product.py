@@ -185,7 +185,19 @@ class PurchaseOrderline(models.Model):
                     rec.intransit_qty = intransit
 
 
+class StockPicking(models.Model):
+    _inherit = 'stock.picking'
 
+    def button_validate(self):
+        for rec in self:
+            rec.state = 'done'
+            for line in rec.move_ids_without_package:
+                if line.intransit_qty > 0 and line.quantity_done == 0:
+                    line.quantity_done = line.intransit_qty
+                    line.intransit_qty = 0
+                if line.intransit_qty > 0 and line.quantity_done > 0:
+                    line.intransit_qty = line.intransit_qty - line.quantity_done
+            return super(StockPicking, self).button_validate()
 
 class AccountMove(models.Model):
     _inherit = "account.move"
