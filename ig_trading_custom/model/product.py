@@ -211,12 +211,26 @@ class AccountMove(models.Model):
     bilty_date = fields.Date(readonly=1, string='Bilty Date')
     no_packages = fields.Char('Number Of Packages')
 
-class StockMove(models.Model):
-    _inherit = "stock.move"
+
+
+
+
+
+class StockMoveLine(models.Model):
+    _inherit = "stock.move.line"
 
     intransit_qty = fields.Float()
+    
+    
+class deliveryreport(models.Model):
+    _inherit = "stock.move"
 
-    @api.depends('move_ids_without_package')
+    model = fields.Char('Model')
+    brand = fields.Char('Brand ')
+    on_hand = fields.Float(compute='product_location_change')
+    others_qty = fields.Float('Others',compute='product_location_change')
+    intransit_qty = fields.Float()
+
     @api.onchange('product_id')
     def product_location_change(self):
         for rec in self:
@@ -232,25 +246,14 @@ class StockMove(models.Model):
                     location_id = sale_order.warehouse_id.lot_stock_id
                     if location_id.id == stock.location_id.id:
                         rec.on_hand = stock.quantity
+                        if rec.others_qty == 0:
+                            rec.others_qty = 0
                     else:
                         if stock.quantity > 0:
                             others += stock.quantity
                             rec.others_qty = others
-
-
-class StockMoveLine(models.Model):
-    _inherit = "stock.move.line"
-
-    intransit_qty = fields.Float()
-    
-    
-class deliveryreport(models.Model):
-    _inherit = "stock.move"
-
-    model = fields.Char('Model')
-    brand = fields.Char('Brand ')
-    on_hand = fields.Float()
-    others_qty = fields.Float('Others')
+                            if rec.on_hand == 0:
+                             rec.on_hand = 0
 
     @api.onchange('model')
     def get_model(self):
