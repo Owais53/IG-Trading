@@ -9,4 +9,12 @@
             name="ig_trading_custom.ig_sale_order_template"
             file="ig_trading_custom.ig_sale_order_template"
         />
+        <report
+            id="report_print_packing_list"
+            model="stock.picking"
+            report_type="qweb-pdf"
+            string="Packing List"
+            name="ig_trading_custom.ig_stock_picking_template"
+            file="ig_trading_custom.ig_stock_picking_template"
+        />
 </openerp>

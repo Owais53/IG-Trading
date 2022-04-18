@@ -19,6 +19,9 @@ class Product(models.Model):
             stock_move = self.env['stock.move'].search([('product_id', '=', product_id)])
             total_transit_qty = 0
             for line in stock_move:
+             for picking in stock_move.picking_id:
+              state = self.env['stock.picking'].search([('id','=',picking.id)])
+              if state.state == 'intransit':
                 intransit_qty = line.intransit_qty
                 total_transit_qty += intransit_qty
                 intransit_qty = 0
@@ -199,6 +202,7 @@ class StockPicking(models.Model):
                     line.intransit_qty = line.intransit_qty - line.quantity_done
             return super(StockPicking, self).button_validate()
 
+
 class AccountMove(models.Model):
     _inherit = "account.move"
 
@@ -211,6 +215,27 @@ class StockMove(models.Model):
     _inherit = "stock.move"
 
     intransit_qty = fields.Float()
+
+    @api.depends('move_ids_without_package')
+    @api.onchange('product_id')
+    def product_location_change(self):
+        for rec in self:
+            if rec.product_id:
+                others = 0
+                stock_qty_obj = self.env['stock.quant']
+                stock_qty_lines = stock_qty_obj.search([('product_id', '=', rec.product_id.id)])
+                if not stock_qty_lines:
+                    rec.on_hand = 0
+                    rec.others_qty = 0
+                for stock in stock_qty_lines:
+                    sale_order = self.env['sale.order'].search([('name', '=', rec.origin)])
+                    location_id = sale_order.warehouse_id.lot_stock_id
+                    if location_id.id == stock.location_id.id:
+                        rec.on_hand = stock.quantity
+                    else:
+                        if stock.quantity > 0:
+                            others += stock.quantity
+                            rec.others_qty = others
 
 
 class StockMoveLine(models.Model):
@@ -254,5 +279,7 @@ class deliveryreport(models.Model):
 class Delivery(models.Model):
     _inherit = "stock.picking"
 
-    transport = fields.Char('Transport')    
+    transport = fields.Char('Transport')
+
+
 
