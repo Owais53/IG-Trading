@@ -66,6 +66,8 @@
                 <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='price_unit']" position="after">
                     <field name="model" readonly="0"/>
                     <field name="cost" readonly="0"/>
+                    <field name="multiplier" readonly="0"/>
+                    <field name="provisional_factor" readonly="0"/>
 
                 </xpath>
             </field>

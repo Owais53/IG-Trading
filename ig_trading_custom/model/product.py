@@ -161,8 +161,16 @@ class PurchaseOrderline(models.Model):
     _inherit = "purchase.order.line"
 
     model = fields.Char('Model')
-    cost = fields.Char('Cost')
+    cost = fields.Char('Previous Cost')
+    multiplier = fields.Float('Multiplier')
+    provisional_factor = fields.Float('Provisional Factor')
     intransit_qty = fields.Float('Intransit Quantity',compute='get_intransit_qty')
+
+    @api.onchange('multiplier')
+    def get_provisional_factor(self):
+        for rec in self:
+            if rec.multiplier and float(rec.cost) > 0:
+                rec.provisional_factor = float(rec.cost) * float(rec.multiplier)
 
     @api.onchange('model')
     def get_model(self):
