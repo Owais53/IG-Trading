@@ -60,6 +60,7 @@ class SaleOrderline(models.Model):
     sale_price = fields.Float('Previous Price')
     on_hand = fields.Float()
     others_qty = fields.Float('Others')
+    provisional_factor = fields.Float('Provisional Factor')
 
     @api.onchange('model')
     def get_model(self):
@@ -82,6 +83,8 @@ class SaleOrderline(models.Model):
                 rec.product_id = product_id
                 rec.brand = product_id.brand
                 rec.model = product_id.model
+                if rec.product_id.categ_id.multiplier and float(rec.sale_price) > 0:
+                    rec.provisional_factor = float(rec.sale_price) * float(rec.product_id.categ_id.multiplier)
 
     @api.onchange('product_id')
     def product_location_change(self):
@@ -156,21 +159,19 @@ class PurchaseOrder(models.Model):
             else:
                 rec.order_line.cost = 0
 
+class ProductCategory(models.Model):
+    _inherit = "product.category"
+
+    multiplier = fields.Float('Multiplier')
 
 class PurchaseOrderline(models.Model):
     _inherit = "purchase.order.line"
 
     model = fields.Char('Model')
     cost = fields.Char('Previous Cost')
-    multiplier = fields.Float('Multiplier')
-    provisional_factor = fields.Float('Provisional Factor')
     intransit_qty = fields.Float('Intransit Quantity',compute='get_intransit_qty')
 
-    @api.onchange('multiplier')
-    def get_provisional_factor(self):
-        for rec in self:
-            if rec.multiplier and float(rec.cost) > 0:
-                rec.provisional_factor = float(rec.cost) * float(rec.multiplier)
+
 
     @api.onchange('model')
     def get_model(self):
