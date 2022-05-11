@@ -10,7 +10,7 @@
     'images' : [],
     'depends' : ['product','sale'],
     'data': [
-
+         'security/ir.model.access.csv',
         'view/product.xml',
          'report/report_view.xml',
         'report/sale_order.xml',

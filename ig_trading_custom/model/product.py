@@ -1,4 +1,5 @@
 from odoo import api, fields, models, _, tools
+from datetime import timedelta, date
 from odoo.osv import expression
 from odoo.exceptions import UserError, ValidationError
 
@@ -8,7 +9,7 @@ class Product(models.Model):
 
     model = fields.Char('Model')
     brand = fields.Char('Brand ')
-    intransit_qty = fields.Float('Intransit Quantity',compute='get_intransit_qty')
+    intransit_qty = fields.Float('Intransit Quantity', compute='get_intransit_qty')
 
     def get_qty(self):
         return True
@@ -19,13 +20,14 @@ class Product(models.Model):
             stock_move = self.env['stock.move'].search([('product_id', '=', product_id)])
             total_transit_qty = 0
             for line in stock_move:
-             for picking in stock_move.picking_id:
-              state = self.env['stock.picking'].search([('id','=',picking.id)])
-              if state.state == 'intransit':
-                intransit_qty = line.intransit_qty
-                total_transit_qty += intransit_qty
-                intransit_qty = 0
+                for picking in stock_move.picking_id:
+                    state = self.env['stock.picking'].search([('id', '=', picking.id)])
+                    if state.state == 'intransit':
+                        intransit_qty = line.intransit_qty
+                        total_transit_qty += intransit_qty
+                        intransit_qty = 0
             rec.intransit_qty = total_transit_qty
+
 
 class StockPicking(models.Model):
     _inherit = "stock.picking"
@@ -36,7 +38,7 @@ class StockPicking(models.Model):
         ('waiting', 'Waiting Another Operation'),
         ('confirmed', 'Waiting'),
         ('assigned', 'Ready'),
-        ('intransit','Intransit'),
+        ('intransit', 'Intransit'),
         ('done', 'Done'),
         ('cancel', 'Cancelled'),
     ], string='Status', compute='_compute_state',
@@ -51,6 +53,7 @@ class StockPicking(models.Model):
     def before_validation(self):
         self.state = 'intransit'
         self.check_validation = True
+
 
 class SaleOrderline(models.Model):
     _inherit = "sale.order.line"
@@ -68,10 +71,10 @@ class SaleOrderline(models.Model):
             if rec.model:
                 model = rec.model
                 if model:
-                 product = self.env['product.template'].search([('model', '=', rec.model)]).id
-                 product_id = self.env['product.product'].search([('product_tmpl_id', '=', product)]).id
-                 rec.product_id = product_id
-                 rec.model = model
+                    product = self.env['product.template'].search([('model', '=', rec.model)]).id
+                    product_id = self.env['product.product'].search([('product_tmpl_id', '=', product)]).id
+                    rec.product_id = product_id
+                    rec.model = model
 
     @api.onchange('product_id')
     def get_product_id(self):
@@ -101,11 +104,9 @@ class SaleOrderline(models.Model):
                     if location_id.id == stock.location_id.id:
                         rec.on_hand = stock.quantity
                     else:
-                       if stock.quantity > 0:
-                         others += stock.quantity
-                         rec.others_qty = others
-
-
+                        if stock.quantity > 0:
+                            others += stock.quantity
+                            rec.others_qty = others
 
 
 class SaleOrder(models.Model):
@@ -159,19 +160,19 @@ class PurchaseOrder(models.Model):
             else:
                 rec.order_line.cost = 0
 
+
 class ProductCategory(models.Model):
     _inherit = "product.category"
 
     multiplier = fields.Float('Multiplier')
+
 
 class PurchaseOrderline(models.Model):
     _inherit = "purchase.order.line"
 
     model = fields.Char('Model')
     cost = fields.Char('Previous Cost')
-    intransit_qty = fields.Float('Intransit Quantity',compute='get_intransit_qty')
-
-
+    intransit_qty = fields.Float('Intransit Quantity', compute='get_intransit_qty')
 
     @api.onchange('model')
     def get_model(self):
@@ -191,10 +192,10 @@ class PurchaseOrderline(models.Model):
                 rec.intransit_qty = 0
                 stock_moves = self.env['stock.move'].search([('product_id', '=', rec.product_id.id)])
                 for stock in stock_moves:
-                 state = stock.picking_id.state
-                 if state == "intransit":
-                    intransit += stock.intransit_qty
-                    rec.intransit_qty = intransit
+                    state = stock.picking_id.state
+                    if state == "intransit":
+                        intransit += stock.intransit_qty
+                        rec.intransit_qty = intransit
 
 
 class StockPicking(models.Model):
@@ -216,28 +217,31 @@ class AccountMove(models.Model):
     _inherit = "account.move"
 
     bilty = fields.Char()
-
     bilty_date = fields.Date(readonly=1, string='Bilty Date')
     no_packages = fields.Char('Number Of Packages')
 
 
+class ProductCostHistory(models.Model):
+    _name = "product.cost.history"
 
-
+    product_id = fields.Many2one('product.product')
+    date_of_cost = fields.Date()
+    cost = fields.Float()
 
 
 class StockMoveLine(models.Model):
     _inherit = "stock.move.line"
 
     intransit_qty = fields.Float()
-    
-    
+
+
 class deliveryreport(models.Model):
     _inherit = "stock.move"
 
     model = fields.Char('Model')
     brand = fields.Char('Brand ')
     on_hand = fields.Float(compute='product_location_change')
-    others_qty = fields.Float('Others',compute='product_location_change')
+    others_qty = fields.Float('Others', compute='product_location_change')
     intransit_qty = fields.Float()
 
     @api.onchange('product_id')
@@ -262,7 +266,7 @@ class deliveryreport(models.Model):
                             others += stock.quantity
                             rec.others_qty = others
                             if rec.on_hand == 0:
-                             rec.on_hand = 0
+                                rec.on_hand = 0
 
     @api.onchange('model')
     def get_model(self):
@@ -292,6 +296,39 @@ class Delivery(models.Model):
     _inherit = "stock.picking"
 
     transport = fields.Char('Transport')
+
+
+class ProductsTemplate(models.Model):
+    _inherit = "product.template"
+
+    size = fields.Char()
+
+    def write(self, vals):
+        if vals.get('standard_price'):
+            values = {'product_id': self.id, 'date_of_cost': date.today(), 'cost': self.standard_price}
+            self.env['product.cost.history'].create(values)
+            total_costs = self.env['product.cost.history'].search_count([('product_id', '=', self.id)])
+            if total_costs > 3:
+                cost_history = self.env['product.cost.history'].search([('product_id', '=', self.id)])
+                cost_ids = []
+                for cost_id in cost_history:
+                    cost_ids.append(cost_id.id)
+                self.env["product.cost.history"].search([('id', '=', min(cost_ids))]).unlink()
+        res = super(ProductsTemplate, self).write(vals)
+        return res
+
+    def get_product_costs(self):
+        return {
+            'name': "Product Costs",
+            'view_mode': 'tree',
+            'view_type': 'form',
+            'res_model': 'product.cost.history',
+            'type': 'ir.actions.act_window',
+            'target': 'current',
+            'domain': [('product_id', '=', self.id)],
+            'context': "{'create': False}"
+        }
+
 
 
 
